@@ -1,0 +1,9 @@
+{
+  "name": "sstim-sensory-reference",
+  "version": "0.1.0",
+  "description": "Study senses, perception, sound/music and sensory technologies with SSTIM and propose improvements.",
+  "author": {
+    "name": "SSTIM W3C Community Group"
+  },
+  "homepage": "https://w3c-cg.github.io/sstim/"
+}

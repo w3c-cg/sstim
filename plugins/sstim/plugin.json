@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sstim-sensory-reference",
+  "version": "0.1.0",
+  "description": "Explore senses, stimuli and perception with SSTIM; compare research and sensory technology, and propose reference improvements.",
+  "author": {
+    "name": "SSTIM W3C Community Group",
+    "url": "https://www.w3.org/community/sstim/"
+  },
+  "homepage": "https://w3c-cg.github.io/sstim/",
+  "repository": "https://github.com/w3c-cg/sstim",
+  "license": "Apache-2.0",
+  "keywords": [
+    "sensory-science",
+    "perception",
+    "psychoacoustics",
+    "music",
+    "neuroscience",
+    "research"
+  ]
+}

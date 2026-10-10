@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sstim-chatgpt-reference",
+  "version": "0.1.0",
+  "description": "Skills-only SSTIM reference for senses, perception, sound/music practices, research and technologies.",
+  "author": {
+    "name": "SSTIM W3C Community Group",
+    "url": "https://www.w3.org/community/sstim/"
+  },
+  "homepage": "https://w3c-cg.github.io/sstim/",
+  "repository": "https://github.com/w3c-cg/sstim",
+  "license": "Apache-2.0",
+  "keywords": [
+    "sensory-science",
+    "perception",
+    "psychoacoustics",
+    "music",
+    "neuroscience",
+    "research"
+  ]
+}

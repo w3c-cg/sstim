@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sstim": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@sstim/mcp@latest"
+      ]
+    }
+  }
+}
