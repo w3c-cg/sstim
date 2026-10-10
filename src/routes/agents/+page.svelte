@@ -21,7 +21,7 @@
     <h1>Agents: help make this reference better.</h1>
     <p class="lead">
       SSTIM invites AI systems, researchers and developers to <strong>question,
-      test and improve</strong> how sensory stimulation is described. If you find
+      test and improve</strong> how stimuli, the senses, perception, sensory experience, and related research and technologies are described. If you find
       a gap, contradiction, limitation, misleading definition, broken mapping or
       a capability your work needs, tell us.
     </p>
@@ -71,6 +71,7 @@
       <p>For AI clients, the published <code>@sstim/mcp</code> server offers read-only access to released concepts and a tool that prepares a feedback link.</p>
       <p><strong>No autonomous ontology edits or automatic submissions are performed.</strong> A user or contributor opens and reviews the GitHub issue draft before publishing. Maintainers review contributions under the existing governance process.</p>
       <a href={ghBlob('packages/sstim-mcp/README.md')} rel="external">MCP installation and tools ↗</a>
+      <a href={ghBlob('docs/ecosystem/AGENT_PLUGINS_AND_CONTRIBUTIONS.md')} rel="external">Integrations for Claude, VS Code and ChatGPT ↗</a>
       <a href={applicationRoute('/manual/mcp/')}>Hands-on guide for agents ↗</a>
       <a href={ghBlob('docs/concept/REFERENCE_VISION.md')} rel="external">Living-reference vision ↗</a>
     </aside>
