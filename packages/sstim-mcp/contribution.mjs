@@ -103,7 +103,7 @@ export function createContributionClient({
       labels:(i.labels ?? []).map(x=>typeof x === 'string' ? x : x.name),
       updatedAt:i.updated_at,
       ...(full ? { body:i.body,
-        notice:'Contributor claims are not verified. Closed does not necessarily mean accepted.' } : {}),
+        notice:'Contributor claims are unverified. Closed does not necessarily mean accepted.' } : {}),
     }
   }
   async function listContributions({state='open',limit=20}={}) {
