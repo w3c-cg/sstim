@@ -69,6 +69,7 @@ export function draftContribution(args) {
 export function createContributionClient({
   fetchImpl = globalThis.fetch, token = process.env.SSTIM_GITHUB_TOKEN,
   timeoutMs = 10000,
+  allowSubmission = process.env.SSTIM_ENABLE_PUBLIC_SUBMISSIONS === '1',
 } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('fetch implementation required')
   let lastSubmission = 0
@@ -125,6 +126,8 @@ export function createContributionClient({
   async function submitContribution(args={}) {
     if (args.approvedForPublicSubmission !== true)
       throw new Error('Explicit authorization for this exact public proposal is required')
+    if (!allowSubmission)
+      throw new Error('Public issue submissions are disabled. Set SSTIM_ENABLE_PUBLIC_SUBMISSIONS=1 explicitly in the host environment.')
     if (!token || typeof token !== 'string')
       throw new Error('Submission unavailable. Set SSTIM_GITHUB_TOKEN with Issues write access.')
     const draft=draftContribution(args)

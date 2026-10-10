@@ -40,14 +40,17 @@ describe('review-only SSTIM MCP proposals', () => {
   })
   it('does not submit without authorization and a locally configured token', async () => {
     const fx=fixture()
-    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:''})
+    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:'',allowSubmission:true})
     await expect(c.submitContribution(base)).rejects.toThrow(/Explicit authorization/)
     await expect(c.submitContribution({...base,approvedForPublicSubmission:true})).rejects.toThrow(/SSTIM_GITHUB_TOKEN/)
+    expect(fx.calls).toHaveLength(0)
+    const disabled=createContributionClient({fetchImpl:fx.fetchImpl,token:'fixture-only',allowSubmission:false})
+    await expect(disabled.submitContribution({...base,approvedForPublicSubmission:true})).rejects.toThrow(/disabled/)
     expect(fx.calls).toHaveLength(0)
   })
   it('writes only a public proposal issue to the fixed GitHub repository after consent', async () => {
     const fx=fixture()
-    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:'fixture-only'})
+    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:'fixture-only',allowSubmission:true})
     const result=await c.submitContribution({...base,approvedForPublicSubmission:true})
     expect(result.submitted).toBe(true)
     expect(result.number).toBe(31)
@@ -63,7 +66,7 @@ describe('review-only SSTIM MCP proposals', () => {
     const original=draftContribution(base)
     const fx=fixture({issues:[{number:19,html_url:'https://github.com/w3c-cg/sstim/issues/19',
       body:original.body}]})
-    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:'fixture-only'})
+    const c=createContributionClient({fetchImpl:fx.fetchImpl,token:'fixture-only',allowSubmission:true})
     const result=await c.submitContribution({...base,approvedForPublicSubmission:true})
     expect(result.duplicate).toBe(true)
     expect(fx.calls.every(call=>call.options.method==='GET')).toBe(true)
