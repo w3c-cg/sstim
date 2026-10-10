@@ -24,7 +24,7 @@ does an ontology entry prove a therapeutic outcome.
   repository root .claude-plugin/marketplace.json provides discovery.
 - ChatGPT: plugins/chatgpt/
   Skills-only portable package. This is not yet a ChatGPT remote MCP app.
-  ChatGPT requires a separately hosted, accessible HTTPS MCP endpoint.
+  ChatGPT Desktop may run the bundled local stdio MCP after installation and the appropriate local-app permissions. ChatGPT web/mobile requires a separately hosted, accessible HTTPS MCP endpoint.
 
 All configured MCP commands use npx --yes @sstim/mcp@latest. Until
 npm v0.3.0 is published, this resolves the existing read-only v0.2.0
