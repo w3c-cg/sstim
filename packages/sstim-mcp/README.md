@@ -107,6 +107,7 @@ The new `sstim_draft_contribution` tool builds a structured, unreviewed issue
 proposal, with an explicit epistemic status. `sstim_list_contributions` and
 `sstim_get_contribution` retrieve public issue records and their actual state.
 `sstim_submit_contribution` creates a **public GitHub Issue**, but only if
+`SSTIM_ENABLE_PUBLIC_SUBMISSIONS=1` is explicitly set by the operator and
 `SSTIM_GITHUB_TOKEN` is configured with appropriate GitHub Issues write access
 and `approvedForPublicSubmission: true` is supplied after the operator reviews
 the exact proposal. A local cooldown and fingerprint scan reduce accidental
