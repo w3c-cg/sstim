@@ -23,8 +23,10 @@ does an ontology entry prove a therapeutic outcome.
   Includes native .claude-plugin manifest, MCP config and skill. The
   repository root .claude-plugin/marketplace.json provides discovery.
 - ChatGPT: plugins/chatgpt/
-  Skills-only portable package. This is not yet a ChatGPT remote MCP app.
-  ChatGPT Desktop may run the bundled local stdio MCP after installation and the appropriate local-app permissions. ChatGPT web/mobile requires a separately hosted, accessible HTTPS MCP endpoint.
+  Portable skill plus optional local stdio MCP. Compatible ChatGPT Desktop
+  installations may run the local MCP after required permissions and setup.
+  This is not yet a remote ChatGPT MCP app; web/mobile access requires a
+  separately hosted, accessible HTTPS endpoint.
 
 All configured MCP commands use npx --yes @sstim/mcp@latest. Until
 npm v0.3.0 is published, this resolves the existing read-only v0.2.0
@@ -61,7 +63,7 @@ via their installed Agent Plugins feature, or use the existing
 .vscode/mcp.json example for read-only MCP access. A VSIX is not required
 for basic MCP usage. Client-specific behavior still needs testing.
 
-ChatGPT users may load the standalone skill where supported. A ChatGPT
+ChatGPT users may install the skill and, on compatible desktop hosts, use the local stdio MCP with the necessary permissions. A ChatGPT
 plugin combining the new MCP tools with that skill awaits a real hosted
 Streamable HTTP endpoint, user-specific authorization, directory review
 and proof of secure write behavior. Do not invent an endpoint or present

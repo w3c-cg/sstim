@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "sstim-chatgpt-reference",
   "version": "0.1.0",
-  "description": "Skills-only SSTIM reference for senses, perception, sound/music practices, research and technologies.",
+  "description": "SSTIM senses and perception reference, with a reusable skill and local desktop MCP.",
   "author": {
     "name": "SSTIM W3C Community Group",
     "url": "https://www.w3.org/community/sstim/"
