@@ -35,7 +35,8 @@ implementation and does not expose direct proposal submission.
 To exercise the new source tools before npm publication, run
 node packages/sstim-mcp/server.mjs as a local stdio MCP server.
 
-Public GitHub proposal submission additionally requires SSTIM_GITHUB_TOKEN,
+Public GitHub proposal submission is disabled by default. The operator must
+set SSTIM_ENABLE_PUBLIC_SUBMISSIONS=1 and SSTIM_GITHUB_TOKEN,
 set securely in the host environment, with Issues write permission for
 w3c-cg/sstim. An explicit approvedForPublicSubmission true argument is
 required for each exact public proposal. Never place tokens in plugin
