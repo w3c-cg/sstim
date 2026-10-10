@@ -1,0 +1,57 @@
+name: Publish SSTIM MCP to npm
+
+# Explicit maintainer-controlled release; NEVER runs on ordinary pushes.
+# Configure @sstim/mcp Trusted Publisher for w3c-cg/sstim and this workflow
+# on npmjs.com before using. Does not publish from the legacy mirror.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.repository == 'w3c-cg/sstim' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out canonical main
+        uses: actions/checkout@v6
+      - name: Install supported Node for npm Trusted Publishing
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - name: Ensure npm supports OIDC
+        run: npm install --global npm@latest
+      - name: Check package identity and pending version
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { readFileSync } from 'node:fs'
+          const p=JSON.parse(readFileSync('packages/sstim-mcp/package.json','utf8'))
+          const m=JSON.parse(readFileSync('packages/sstim-mcp/server.json','utf8'))
+          assert.equal(p.name,'@sstim/mcp')
+          assert.equal(m.name,'io.github.w3c-cg/sstim')
+          assert.equal(m.version,p.version)
+          assert.equal(m.packages[0].version,p.version)
+          assert.ok(/^\d+\.\d+\.\d+$/.test(p.version))
+          NODE
+      - name: Install pinned repository dependencies
+        run: npm ci
+      - name: Test MCP protocols, proposal permissions and npm tarball
+        run: npm test -- --run packages/sstim-mcp/mcp.test.mjs packages/sstim-mcp/contribution.test.mjs packages/sstim-mcp/package.test.mjs
+      - name: Check package is not already published
+        working-directory: packages/sstim-mcp
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "@sstim/mcp@${version}" version --silent 2>/dev/null; then
+            echo "::error::Version ${version} is already on npm; refusing to republish"
+            exit 1
+          fi
+      - name: Publish public npm package through trusted OIDC
+        working-directory: packages/sstim-mcp
+        run: npm publish --access public
