@@ -15,9 +15,10 @@
 scientific and technical understanding of sensory stimulation, useful to humans
 and AI systems. Read [the vision](docs/concept/REFERENCE_VISION.md) before
 reframing public copy. Agents may report reproducible needs or flaws via the
-[public contribution guide](https://w3c-cg.github.io/sstim/agents/), but neither
-the reviewable issue-draft form nor any proposal authorizes unattended
-submissions or canonical RDF changes. Adding invitations to RDF and
+[public contribution guide](https://w3c-cg.github.io/sstim/agents/), but the reviewable
+issue-draft form and the GitHub-backed MCP proposal queue do not authorize
+unattended submissions or canonical RDF changes. MCP issue submission needs
+explicit operator approval and appropriate credentials. Adding invitations to RDF and
 annotations is [explicitly deferred](docs/technical/AI_CONTRIBUTION_IN_RDF_PLAN.md).
 
 **SSTIM** is the open formalized knowledge standard: specification, RDF

@@ -129,8 +129,14 @@ describe('SSTIM MCP protocol dispatcher', () => {
     getConcept: async () => ({ term: makeDetail('0.19.0') }),
     prepareFeedback: async () => ({ url: 'https://w3c-cg.github.io/sstim/contribute/' }),
   }
-  it('requires initialization and advertises only read-only tools', async () => {
-    const dispatch = makeDispatcher(mock)
+  const feedback = {
+    draftContribution: (a) => ({ title:a.title, submitted:false }),
+    listContributions: async () => ({ results:[] }),
+    getContribution: async ({number}) => ({ number, state:'open' }),
+    submitContribution: async () => ({ submitted:true, number:42 }),
+  }
+  it('requires initialization and differentiates read and write tools', async () => {
+    const dispatch = makeDispatcher(mock, feedback)
     const send = (id, method, params) => dispatch({ jsonrpc: '2.0', id, method, params })
     expect((await send(1, 'tools/list')).error.code).toBe(-32000)
     const init = await send(2, 'initialize', {
@@ -142,12 +148,22 @@ describe('SSTIM MCP protocol dispatcher', () => {
     const list = await send(3, 'tools/list')
     expect(list.result.tools.map(t => t.name)).toEqual([
       'sstim_list_releases', 'sstim_search_concepts', 'sstim_get_concept', 'sstim_prepare_feedback',
+      'sstim_draft_contribution', 'sstim_list_contributions', 'sstim_get_contribution', 'sstim_submit_contribution',
     ])
-    expect(list.result.tools.every(x => x.annotations.readOnlyHint)).toBe(true)
+    expect(list.result.tools.filter(x => x.name !== 'sstim_submit_contribution').every(x => x.annotations.readOnlyHint)).toBe(true)
+    expect(list.result.tools.at(-1).annotations.readOnlyHint).toBe(false)
     const result = await send(4, 'tools/call', { name: 'sstim_search_concepts',
       arguments: { query: 'stimulation' } })
     expect(result.result.structuredContent.totalMatches).toBe(1)
     expect(result.result.isError).toBe(false)
+    const proposal = { kind:'research-need', stance:'request', title:'Perception research',
+      description:'Need an explicit source-sensitive description' }
+    const submitted = await send(9, 'tools/call', { name:'sstim_submit_contribution',
+      arguments:{...proposal,approvedForPublicSubmission:true} })
+    expect(submitted.result.structuredContent.submitted).toBe(true)
+    const invalid = await send(10,'tools/call',{name:'sstim_submit_contribution',
+      arguments:{...proposal,approvedForPublicSubmission:'true'}})
+    expect(invalid.error.code).toBe(-32602)
     const bad = await send(5, 'tools/call', { name: 'sstim_get_concept',
       arguments: { identifier: ['bad'] } })
     expect(bad.error.code).toBe(-32602)
@@ -174,7 +190,7 @@ describe('SSTIM MCP protocol dispatcher', () => {
         new Promise((_, reject) => setTimeout(() => reject(new Error('stdio server timeout')), 5000)),
       ])
       expect(responses.map(x => x.id)).toEqual([1, 2])
-      expect(responses[1].result.tools.length).toBe(4)
+      expect(responses[1].result.tools.length).toBe(8)
     } finally {
       if (child.exitCode === null) child.kill()
       reader.close()

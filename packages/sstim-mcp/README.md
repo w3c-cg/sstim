@@ -1,13 +1,21 @@
-# SSTIM MCP reference adapter
+# SSTIM MCP: senses, stimuli, perception and research
 
-**Status:** local, read-only MCP server over stdio. Supports the **current MCP
+**Status:** source version 0.3.0 adds an explicitly authorized, GitHub-backed
+contribution workflow to the read-only knowledge tools. **The published npm
+version is still 0.2.0** until the maintainer performs npm publication.
+Use the GitHub checkout to test 0.3.0 contribution features before release.
+The new code continues to support the **current MCP
 `2026-07-28` stateless protocol** and legacy initialization-based clients
 (`2025-11-25`, `2025-06-18`, `2024-11-05`).
 
 The adapter retrieves frozen SSTIM release data from the
 [Concept Reference API](../../docs/technical/CONCEPT_REFERENCE_API.md). It is
-not an ontology server, a write API, a hosted remote MCP endpoint, or a GitHub
-connector. Its four tools require no API key or additional runtime npm packages.
+not an ontology write interface or hosted remote MCP endpoint.
+The four knowledge tools remain available without credentials.
+Four additional proposal tools can draft suggestions, browse GitHub review issues,
+and, **only when an authorized operator has configured an Issues-write token and
+approved the exact public content**, submit a GitHub issue for review.
+No tool changes canonical RDF or accepts scientific assertions as established.
 
 ## Distribution and authorship
 
@@ -93,7 +101,34 @@ Use [Python sstim](https://pypi.org/project/sstim/) or
 for data validation, and use the Workbench to explore or author reference
 patches.
 
-## Four available tools
+## Contribution workflow in source version 0.3.0
+
+The new `sstim_draft_contribution` tool builds a structured, unreviewed issue
+proposal, with an explicit epistemic status. `sstim_list_contributions` and
+`sstim_get_contribution` retrieve public issue records and their actual state.
+`sstim_submit_contribution` creates a **public GitHub Issue**, but only if
+`SSTIM_GITHUB_TOKEN` is configured with appropriate GitHub Issues write access
+and `approvedForPublicSubmission: true` is supplied after the operator reviews
+the exact proposal. A local cooldown and fingerprint scan reduce accidental
+duplicates. This is not an unattended permission to submit private material.
+
+Never put the token in a plugin manifest or conversation. Use the host's
+credential or environment management; no GitHub credential is bundled.
+Contributions are not automatically accepted; a closed GitHub issue is not
+necessarily an accepted scientific assertion.
+
+Supported proposal kinds: correction, missing knowledge, scientific evidence,
+interoperability, research need and other. Relevant subjects may include
+sensory transduction, perception, sound or music-based practices, neuroscience,
+creative work and technological applications. SSTIM is not a comprehensive
+encyclopedia of these areas; gaps are valid reports. Sources are
+contributor-supplied and must be independently assessed.
+
+This version is **not yet on npm**: the installation examples below continue to
+target the verifiably published `@sstim/mcp@0.2.0` and therefore expose only the
+four read-only tools until a future npm release.
+
+## Four tools in the currently published npm version
 
 | Tool | Result |
 |---|---|
@@ -310,8 +345,8 @@ runtime constant. At the time of this update it is **v0.19.0**; the separately
 maintained development line is **v0.20.0-dev**. For repeatable research use an
 explicit frozen release in tool arguments.
 
-**Operational limits:** read-only catalog; up to 20 search results;
-no hosted `?q=` search; no API key; no write tools; no live ontology inference,
+**Operational limits:** read-only ontology catalog; up to 20 search results;
+no hosted `?q=` search; no live ontology inference,
 adjudication of scientific disputes, or guaranteed clinical meaning.
 The default reference URL is
 `https://w3c-cg.github.io/sstim/api/v1/`.

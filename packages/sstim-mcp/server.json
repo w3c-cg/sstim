@@ -1,21 +1,21 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.w3c-cg/sstim",
-  "title": "SSTIM MCP: Sensory Stimulation Reference",
-  "description": "SSTIM sensory-stimulation ontology: definitions, relationships, mappings and provenance.",
+  "title": "SSTIM MCP: Senses, Stimuli and Perception",
+  "description": "SSTIM reference for senses, stimuli, perception and scientific contributions.",
   "websiteUrl": "https://w3c-cg.github.io/sstim/",
   "repository": {
     "url": "https://github.com/w3c-cg/sstim",
     "source": "github",
     "subfolder": "packages/sstim-mcp"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@sstim/mcp",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "transport": {
         "type": "stdio"
       }

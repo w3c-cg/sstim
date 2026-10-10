@@ -18,7 +18,7 @@ const runNpm = (args, extra = {}) => execFileSync(npmCommand, args, {
 describe('SSTIM MCP standalone npm distribution', () => {
   it('aligns authorship, package ownership metadata, and registry identity', () => {
     expect(meta.name).toBe('@sstim/mcp')
-    expect(meta.version).toBe('0.2.0')
+    expect(meta.version).toBe('0.3.0')
     expect(meta.mcpName).toBe('io.github.w3c-cg/sstim')
     expect(meta.publishConfig.access).toBe('public')
     expect(meta.author.name).toBe('SSTIM W3C Community Group')
@@ -41,12 +41,12 @@ describe('SSTIM MCP standalone npm distribution', () => {
     const pack = JSON.parse(runNpm(['pack', '--dry-run', '--json', '--ignore-scripts']))[0]
     const paths = pack.files.map(x => x.path)
     for (const expected of ['package.json', 'server.mjs', 'client.mjs',
-      'README.md', 'LICENSE', 'server.json']) {
+      'README.md', 'LICENSE', 'server.json', 'contribution.mjs']) {
       expect(paths).toContain(expected)
     }
     expect(paths.some(x => x.startsWith('examples/'))).toBe(true)
     expect(paths.every(x => ['package.json', 'server.mjs', 'client.mjs',
-      'README.md', 'LICENSE', 'server.json'].includes(x) ||
+      'README.md', 'LICENSE', 'server.json', 'contribution.mjs'].includes(x) ||
       x.startsWith('examples/'))).toBe(true)
     expect(meta.bin['sstim-mcp']).toBe('./server.mjs')
     expect(readFileSync(join(dir, 'server.mjs'), 'utf8').startsWith('#!/usr/bin/env node'))

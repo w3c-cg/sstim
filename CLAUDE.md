@@ -26,8 +26,10 @@ external utility outrank ontology growth.
 unmet scientific and engineering needs, counterexamples, or mapping and
 implementation flaws through the [public agent guide](https://w3c-cg.github.io/sstim/agents/)
 and reviewable [contribution form](https://w3c-cg.github.io/sstim/contribute/).
-No report is submitted automatically and no AI system has canonical write
-authority. A later task proposes making the invitation discoverable in RDF
+A proposed MCP contribution can create a public GitHub issue only with
+explicit operator approval of the exact content and a configured authorized
+GitHub token. No AI system has canonical ontology write authority; public issue
+submission is not acceptance of a scientific claim. A later task proposes making the invitation discoverable in RDF
 and annotation metadata; [AI_CONTRIBUTION_IN_RDF_PLAN.md](docs/technical/AI_CONTRIBUTION_IN_RDF_PLAN.md)
 is **deferred** and does not authorize changes to protected ontology sources.
 

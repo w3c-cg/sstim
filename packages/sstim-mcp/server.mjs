@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// Read-only SSTIM MCP adapter for both 2026-07-28 stateless requests
+// Read-only concept access plus consent-gated proposal intake for both 2026-07-28 stateless requests
 // and 2025-era initialize-based sessions over stdio.
-// One JSON-RPC message per line; no HTTP server, credentials or writes.
+// One JSON-RPC message per line; public issue submissions require operator consent and GitHub token.
 import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline'
 import { createConceptClient, DEFAULT_API_BASE } from './client.mjs'
+import { createContributionClient, KINDS } from './contribution.mjs'
 
-const info = { name: 'sstim-reference', version: '0.2.0' }
+const info = { name: 'sstim-reference', version: '0.3.0' }
 const MODERN = '2026-07-28'
 const legacyVersions = new Set(['2025-11-25', '2025-06-18', '2024-11-05'])
 const VERSION_META = 'io.modelcontextprotocol/protocolVersion'
@@ -17,6 +18,18 @@ const client = createConceptClient({
   apiBase: process.env.SSTIM_MCP_API_BASE || DEFAULT_API_BASE,
 })
 
+const contributionProperties = {
+  kind: { type:'string', enum:KINDS, description:'Kind of proposed improvement or research need' },
+  stance: { type:'string', enum:['observed','inferred','hypothesis','request'],
+    description:'Epistemic status of the proposed assertion' },
+  title: { type:'string', description:'Concise proposal title (max 140 characters)' },
+  description: { type:'string', description:'What is wrong, needed, or proposed (max 4000 characters)' },
+  evidence: { type:'string', description:'Source URLs, citations, counterexamples or supporting details (not automatically verified)' },
+  reproduction: { type:'string', description:'Reproduction steps, observed behavior or specific use case' },
+  targetIri: { type:'string', description:'Optional affected public HTTPS term/resource IRI' },
+  release: { type:'string', description:'Optional frozen SSTIM ontology release x.y.z' },
+}
+const contributions = createContributionClient()
 const tools = [
   {
     name: 'sstim_list_releases',
@@ -61,13 +74,51 @@ const tools = [
       },
     },
   },
-].map(tool => ({ ...tool, annotations: { readOnlyHint: true, openWorldHint: true } }))
+  {
+    name:'sstim_draft_contribution',
+    description:'Draft a source-conscious proposal about stimuli, sensory perception, music/sound-based interventions, technology or the SSTIM reference. Never submits or validates claims.',
+    inputSchema:{type:'object',additionalProperties:false,properties:contributionProperties,
+      required:['kind','stance','title','description']},
+  },
+  {
+    name:'sstim_list_contributions',
+    description:'Read recent public SSTIM MCP contribution issues; open/closed status does not mean accepted/rejected science.',
+    inputSchema:{type:'object',additionalProperties:false,properties:{
+      state:{type:'string',enum:['open','closed','all']},
+      limit:{type:'integer',minimum:1,maximum:20},
+    }},
+  },
+  {
+    name:'sstim_get_contribution',
+    description:'Read one public SSTIM MCP contribution issue, including its unverified text and current GitHub issue state.',
+    inputSchema:{type:'object',additionalProperties:false,properties:{
+      number:{type:'integer',minimum:1},
+    },required:['number']},
+  },
+  {
+    name:'sstim_submit_contribution',
+    description:'WRITE: create a PUBLIC GitHub issue containing the exact reviewed proposal. Requires explicit operator authorization for this submission and SSTIM_GITHUB_TOKEN. Does NOT modify canonical SSTIM knowledge.',
+    inputSchema:{type:'object',additionalProperties:false,properties:{
+      ...contributionProperties,
+      approvedForPublicSubmission:{type:'boolean',description:'Must be true only after operator reviews and authorizes publishing this exact proposal publicly'},
+    },required:['kind','stance','title','description','approvedForPublicSubmission']},
+  },
+].map(tool => ({ ...tool, annotations: {
+  readOnlyHint: tool.name !== 'sstim_submit_contribution',
+  destructiveHint:false,
+  idempotentHint:tool.name !== 'sstim_submit_contribution',
+  openWorldHint:true,
+} }))
 
 const commands = {
   sstim_list_releases: (_, c) => c.listReleases(),
   sstim_search_concepts: (args, c) => c.searchConcepts(args),
   sstim_get_concept: (args, c) => c.getConcept(args),
   sstim_prepare_feedback: (args, c) => c.prepareFeedback(args),
+  sstim_draft_contribution: (args, c, g) => g.draftContribution(args),
+  sstim_list_contributions: (args, c, g) => g.listContributions(args),
+  sstim_get_contribution: (args, c, g) => g.getContribution(args),
+  sstim_submit_contribution: (args, c, g) => g.submitContribution(args),
 }
 
 function validArguments(tool, args) {
@@ -92,9 +143,9 @@ function validArguments(tool, args) {
  *
  * Modern requests carry protocolVersion and clientCapabilities in params._meta;
  * legacy requests establish a process-scoped session with initialize.
- * No server-side conversation state is used by the four read-only tools.
+ * Canonical SSTIM data remains read-only. Proposal submissions go only to GitHub Issues.
  */
-export function makeDispatcher(referenceClient = client) {
+export function makeDispatcher(referenceClient = client, contributionClient = contributions) {
   let ready = false
   let initialized = false
 
@@ -166,7 +217,7 @@ export function makeDispatcher(referenceClient = client) {
       return reply({
         supportedVersions: [MODERN],
         capabilities: { tools: { listChanged: false } },
-        instructions: 'Use search to find exact SSTIM IRIs, then get a release-pinned term with source provenance. Suggestions only create links; no writes.',
+        instructions: 'Use search to find exact SSTIM IRIs, then get a release-pinned term with source provenance. Proposal tools can draft and read issues. Submission requires operator authorization and GitHub Issues write credentials; never modifies canonical reference.',
         ttlMs: 0,
         cacheScope: 'public',
       })
@@ -188,7 +239,7 @@ export function makeDispatcher(referenceClient = client) {
       const args = params?.arguments ?? {}
       if (!validArguments(tool, args)) return fail(-32602, 'Invalid MCP tool arguments')
       try {
-        const data = await commands[name](args, referenceClient)
+        const data = await commands[name](args, referenceClient, contributionClient)
         return reply({
           content: [{ type: 'text', text: JSON.stringify(data) }],
           structuredContent: data,

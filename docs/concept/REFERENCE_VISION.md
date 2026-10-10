@@ -25,7 +25,7 @@ SSTIM works toward a shared point of reference, not exclusive authority over sci
 - A published, modular OWL/SKOS reference with stable identifiers, immutable citable releases, conservative external mappings, provenance-aware descriptions and SHACL/profile checks.
 - SSTIM Workbench for concept navigation, SPARQL queries, audiovisual reference patches and documented examples.
 - Published Python and JavaScript clients for version-qualified reference access, session building and validation; the JavaScript client's Full-profile SHACL-SPARQL limitation remains explicitly reported.
-- A published read-only MCP server for AI assistants, using released concept references and providing a user-controlled feedback link rather than autonomous submissions.
+- A published read-only MCP server for AI assistants, using released concept references and providing a user-controlled feedback link. An expanded authenticated GitHub-Issues proposal workflow exists in repository source and remains subject to npm release and independent client testing; it does not edit canonical knowledge.
 - Open proposals and contribution channels under the W3C Sensory Stimulation Vocabulary Community Group.
 
 These are real capabilities, but they do **not** constitute universal coverage, independent scientific validation of all claims, demonstrated cross-device reproduction, or widespread external adoption.
