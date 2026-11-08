@@ -2064,8 +2064,14 @@ because financial sustainability constrains everything else.
 
 - [ ] GitHub organization created: `bsc-lab` or `biosyncare-lab` `P0`
 - [ ] Branch protection: require PR for main, CI must pass `P1`
-- [ ] Dependabot configured for npm dependency updates `P1`
-- [ ] Secret scanning enabled `P1`
+- [~] Dependabot configured for npm dependency updates `P1`
+      *Alerts are on for both repositories (2026-11-08). GitHub's dependency
+      graph had been disabled on both, so no alert had ever fired. Update pull
+      requests stay off on purpose: every lockfile change also needs
+      `flake.nix`'s `npmDepsHash` refreshed, which Dependabot cannot do, so
+      each of its pull requests would fail the Nix build in CI.*
+- [x] Secret scanning enabled `P1`
+      *With push protection, on both repositories (2026-11-08).*
 - [ ] `hooks/pre-commit` — local validation mirror of CI `P1`
 
 > **GitHub traffic snapshots run twice a week**, `17 6 * * 1,4`, from the

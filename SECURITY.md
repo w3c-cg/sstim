@@ -129,16 +129,23 @@ Progress against these is tracked in
 ## Dependency advisories
 
 `npm audit` is not empty. What it still reports, and why each is left, as
-measured on 2026-11-01:
+measured on 2026-11-08:
 
 - **`@grpc/grpc-js` below 1.13.6** (high, four entries through `firebase`).
-  `@firebase/firestore` pins `~1.9` in every Firebase release up to 13.1, so no
+  `@firebase/firestore` pins `~1.9` in every Firebase release up to 13.2, so no
   Firebase upgrade fixes it. It is Firestore's Node transport: the browser
-  build uses WebChannel, and no file of the built site mentions grpc. Revisit
-  when a Firebase release depends on a fixed version.
-- **SvelteKit 2** (low, six entries: `cookie`, `deepmerge`, and two advisories
-  about enhanced form submission). Fixed only in SvelteKit 3. The site is
-  prerendered by `adapter-static` with no server route and no enhanced form.
+  build uses WebChannel, Firestore's browser entry never imports it, and the
+  only "grpc" strings in the built site are Firestore setting and status-code
+  names. Its two advisories concern gRPC servers (`getAuthContext` and handler
+  error messages), and Firestore is only ever a client. Revisit when a
+  Firebase release depends on a fixed version.
+- **SvelteKit 2** (low, six entries: `cookie`, `deepmerge`, and two SvelteKit
+  advisories, one on enhanced form submission and one on a `cache-control`
+  header passed to `setHeaders` in a prerendered page). Cleared only by
+  SvelteKit 3, which needs Vite 8 and `@sveltejs/vite-plugin-svelte` 7. The
+  site is prerendered by `adapter-static` with no server route, no enhanced
+  form, no `setHeaders` call and no cookie API, and `deepmerge` only merges
+  the Svelte plugin's own options at build time.
 
 The two critical advisories, both in the test runner, were cleared by moving to
 vitest 5, and the eight moderate ones in Comunica 3 by moving the SPARQL engine
