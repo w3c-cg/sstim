@@ -124,14 +124,20 @@ redirect continues to reach the project entrance.
 
 Both landing-page publications were verified on 2026-11-12 at commit
 `6a535bfd05c4326218866330a7efa30a274037ac`, including live term-fragment
-selection on production. The minimal registry patch is committed on
-[`ttm:sstim-exposure-namespace-20261112`](https://github.com/perma-id/w3id.org/compare/master...ttm:sstim-exposure-namespace-20261112?expand=1).
-PR submission remains pending: the connected GitHub integration returned
-`403 Resource not accessible by integration`, and the available browser was
-signed out. The prepared branch changes only the Exposure HTML target and its
-comment; it does not change the live redirect until a PR is submitted and merged.
-The [prepared PR description](EXPOSURE_NAMESPACE_PR.md) records the scope and
-the Apache, registry-checker and browser verification results for submission.
+selection on production. The minimal registry patch was submitted with `gh` as
+[perma-id/w3id.org#7165](https://github.com/perma-id/w3id.org/pull/7165).
+The PR is open and its Rules check passed. It changes only the Exposure HTML
+target and its comment; the live redirect changes after upstream merge and
+deployment. The [submitted PR description](EXPOSURE_NAMESPACE_PR.md) records the
+scope and the Apache, registry-checker and browser verification results.
+
+`/sstim/alignments` is unchanged by this PR. It identifies a mapping-axiom
+module, not a separate hash namespace. Its HTML branch reaches the Full
+reference documentation, whose generation includes the Alignments module
+(`make ontology-docs`). The deployed document exposes individual mappings,
+including `sstim-v:alphaOscillation`'s `skos:exactMatch` to Wikidata Q2469782.
+This is a valid reference destination, although a dedicated module overview
+would make the mapping scope, downloads and provenance easier to find.
 
 ## Open follow-ups
 

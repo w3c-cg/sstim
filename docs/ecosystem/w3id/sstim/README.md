@@ -70,7 +70,7 @@ describe how BSC Lab produces the targets rather than how the redirects behave.
 |---|---|---|
 | `/sstim` | RDF: generated Full namespace catalogue `sstim-namespace.{ttl,jsonld,rdf}` for dereferencing `sstim:` hash terms; HTML: human documentation | Live |
 | `/sstim/kernel` | Exact small Kernel distribution `sstim-core.{ttl,jsonld,rdf}` | Live |
-| `/sstim/exposure` | RDF: generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term. HTML: Exposure namespace page at `/namespace/exposure/`, forwarding term fragments to the knowledge browser | RDF live; new HTML page deployed on both origins 2026-11-12; registry patch prepared, PR submission pending |
+| `/sstim/exposure` | RDF: generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term. HTML: Exposure namespace page at `/namespace/exposure/`, forwarding term fragments to the knowledge browser | RDF live; new HTML page deployed on both origins 2026-11-12; HTML redirect awaits merge of [#7165](https://github.com/perma-id/w3id.org/pull/7165) |
 | `/sstim/module/exposure` | Exact Exposure semantic module `sstim-exposure.{ttl,jsonld,rdf}` | Live |
 | `/sstim/{vocab,shapes,alignments,patch-studio,ecosystem}` | Previously published module distributions | Live |
 | `/sstim/{stimulus,core-shapes,common,technique,configuration,session,evidence,neuromodulation,neuromodulation-evidence,evidence-exposure,technique-exposure}` | Manifest-owned modules | Live |
