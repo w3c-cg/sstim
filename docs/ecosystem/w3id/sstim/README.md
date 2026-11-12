@@ -70,7 +70,7 @@ describe how BSC Lab produces the targets rather than how the redirects behave.
 |---|---|---|
 | `/sstim` | RDF: generated Full namespace catalogue `sstim-namespace.{ttl,jsonld,rdf}` for dereferencing `sstim:` hash terms; HTML: human documentation | Live |
 | `/sstim/kernel` | Exact small Kernel distribution `sstim-core.{ttl,jsonld,rdf}` | Live |
-| `/sstim/exposure` | RDF: generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term. HTML: Exposure namespace page at `/namespace/exposure/`, forwarding term fragments to the knowledge browser | RDF live; HTML target staged locally 2026-11-12 |
+| `/sstim/exposure` | RDF: generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term. HTML: Exposure namespace page at `/namespace/exposure/`, forwarding term fragments to the knowledge browser | RDF live; new HTML page deployed on both origins 2026-11-12; registry patch prepared, PR submission pending |
 | `/sstim/module/exposure` | Exact Exposure semantic module `sstim-exposure.{ttl,jsonld,rdf}` | Live |
 | `/sstim/{vocab,shapes,alignments,patch-studio,ecosystem}` | Previously published module distributions | Live |
 | `/sstim/{stimulus,core-shapes,common,technique,configuration,session,evidence,neuromodulation,neuromodulation-evidence,evidence-exposure,technique-exposure}` | Manifest-owned modules | Live |
@@ -154,7 +154,8 @@ profiles, manifest, and schema—must be generated, deployed, and tested before
 the corresponding `.htaccess` update is submitted to perma-id. Verify the complete route ×
 `Accept` matrix and the `Vary: Accept` response header.
 
-This gate was satisfied on 2026-08-02: every target named above was confirmed
+For the target inventory that existed on 2026-08-02, this gate was satisfied:
+each then-staged RDF target was confirmed
 to return `200` from the then-current publication origin in Turtle, JSON-LD, and
 RDF/XML before the perma-id update was opened. It was satisfied again on
 2026-08-27 for the move to `https://w3c-cg.github.io/sstim/ontology/`, across the

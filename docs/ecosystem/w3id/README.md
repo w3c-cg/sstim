@@ -122,6 +122,17 @@ browser term IRI preserves its selection, and Turtle, JSON-LD, and RDF/XML still
 reach the released namespace catalogue. Until that merge, the live browser
 redirect continues to reach the project entrance.
 
+Both landing-page publications were verified on 2026-11-12 at commit
+`6a535bfd05c4326218866330a7efa30a274037ac`, including live term-fragment
+selection on production. The minimal registry patch is committed on
+[`ttm:sstim-exposure-namespace-20261112`](https://github.com/perma-id/w3id.org/compare/master...ttm:sstim-exposure-namespace-20261112?expand=1).
+PR submission remains pending: the connected GitHub integration returned
+`403 Resource not accessible by integration`, and the available browser was
+signed out. The prepared branch changes only the Exposure HTML target and its
+comment; it does not change the live redirect until a PR is submitted and merged.
+The [prepared PR description](EXPOSURE_NAMESPACE_PR.md) records the scope and
+the Apache, registry-checker and browser verification results for submission.
+
 ## Open follow-ups
 
 - **Automate post-deploy route verification.** `w3id-negotiation.mjs` models the
