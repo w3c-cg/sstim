@@ -67,6 +67,21 @@ required by any current registry. The docs and the app cross-link instead:
   3.x pulls in `kurra` → `shacl-rules`/`sparqlib` (a heavy vendoring cascade and
   a pyshacl version conflict); 2.13.2's deps are all in nixpkgs.
 
+### Searchable external identifiers (2026-11-12)
+
+The generated reference contained UBERON mappings but rendered their fallback
+labels as `U B E R O N 0016490`. Browser Find for `UBERON` therefore missed the
+visible mapping even though its link target was correct. This is a presentation
+defect, not a missing RDF assertion.
+
+`scripts/fix-widoco-links.mjs` now also normalizes generated OBO identifier
+labels to searchable forms such as `UBERON:0016490`. A label is changed only
+when it consists of the identifier in its actual OBO target IRI, allowing for
+the generator's inserted whitespace. Descriptive labels, target IRIs and other
+HTML remain intact. The existing `make ontology-docs` postprocessing applies
+this to both `index-en.html` and `index.html`; generated output remains an
+artifact rather than a committed source.
+
 ## Alternatives considered
 
 - **Docs branch / separate workflow.** A second deploy pipeline and a second

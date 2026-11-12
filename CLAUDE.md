@@ -119,6 +119,11 @@ are chosen but not yet installed — do not describe them as how the app works.
 fragments to the knowledge browser; the Exposure page qualifies bare names as
 `sstim-ex:`. Deploy and verify a new target before submitting its w3id rule.
 
+**Generated reference HTML (ADR 0023).** `scripts/fix-widoco-links.mjs` repairs
+orphaned links and makes fallback OBO identifier labels searchable (for example,
+`UBERON:0016490`). Apply it to both WIDOCO index files, preserving target IRIs
+and descriptive labels; generated HTML is never edited or committed manually.
+
 ### Svelte 5 AI tooling setup
 
 Svelte 5 uses **runes syntax** (`$props()`, `$state()`, `$derived()`, `$effect()`,
