@@ -70,7 +70,7 @@ describe how BSC Lab produces the targets rather than how the redirects behave.
 |---|---|---|
 | `/sstim` | RDF: generated Full namespace catalogue `sstim-namespace.{ttl,jsonld,rdf}` for dereferencing `sstim:` hash terms; HTML: human documentation | Live |
 | `/sstim/kernel` | Exact small Kernel distribution `sstim-core.{ttl,jsonld,rdf}` | Live |
-| `/sstim/exposure` | Generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term | Live |
+| `/sstim/exposure` | RDF: generated Stimulus + Exposure catalogue `sstim-exposure-namespace.{ttl,jsonld,rdf}`, preserving dereference of the moved `exposure#StimulusChannel` term. HTML: Exposure namespace page at `/namespace/exposure/`, forwarding term fragments to the knowledge browser | RDF live; HTML target staged locally 2026-11-12 |
 | `/sstim/module/exposure` | Exact Exposure semantic module `sstim-exposure.{ttl,jsonld,rdf}` | Live |
 | `/sstim/{vocab,shapes,alignments,patch-studio,ecosystem}` | Previously published module distributions | Live |
 | `/sstim/{stimulus,core-shapes,common,technique,configuration,session,evidence,neuromodulation,neuromodulation-evidence,evidence-exposure,technique-exposure}` | Manifest-owned modules | Live |
@@ -113,7 +113,11 @@ permanent identifier must not start answering `406`. Those three are derived at
 deploy (`make publish-releases`), never committed. `Header always set Vary "Accept"` is present but does not take
 effect on w3id.org redirects; see the note above for why that is bounded rather
 than ignored. HTML requests go to human-facing documentation or the
-application.
+application. The bare root namespace reaches `/namespace/`; the staged
+Exposure HTML target is `/namespace/exposure/`. Each explains its namespace
+without a fragment and forwards term fragments to the knowledge browser. The
+Exposure page qualifies a bare local name as `sstim-ex:` so it cannot select a
+term in another namespace that shares its name.
 
 `make export` generates both namespace catalogues from the manifest:
 `sstim-namespace.{ttl,jsonld,rdf}` is the Full semantic union, while
@@ -144,10 +148,10 @@ that actually exist under `static/ontology/<version>/`, including exact
 `manifest` and `manifest.schema.json` routes for future modular releases;
 unknown versions and artifact names remain 404.
 
-All staged Pages targets—including both namespace catalogues, Kernel formats,
-the exact Exposure module formats, other modules, profiles, manifest, and
-schema—must be generated, deployed, and tested before the corresponding
-`.htaccess` update is submitted to perma-id. Verify the complete route ×
+All staged Pages targets—including the Exposure namespace page, both namespace
+catalogues, Kernel formats, the exact Exposure module formats, other modules,
+profiles, manifest, and schema—must be generated, deployed, and tested before
+the corresponding `.htaccess` update is submitted to perma-id. Verify the complete route ×
 `Accept` matrix and the `Vary: Accept` response header.
 
 This gate was satisfied on 2026-08-02: every target named above was confirmed
@@ -182,9 +186,9 @@ a static catalog or live ecosystem identifier reach **that entity's node in the
 knowledge browser** — `/graph/#{prefix}:{local}` — not the project landing page:
 an identifier that answers a browser with a landing page tells the reader
 nothing about the thing they asked for. Module and profile identifiers instead
-reach their generated reference documentation, and the bare namespace reaches
-the project entrance, which is what someone typing `w3id.org/sstim` cold is
-asking for. All three behaviours are pinned in
+reach their generated reference documentation. The bare root namespace reaches
+its namespace page; the staged Exposure HTML target applies the same behavior
+to `/sstim/exposure`. All three behaviours are pinned in
 [`scripts/w3id-negotiation.test.mjs`](../../../../scripts/w3id-negotiation.test.mjs),
 which models the rules the way Apache resolves them — the deep links were merged
 once (upstream #6393) and lost to a later full-file rewrite because nothing

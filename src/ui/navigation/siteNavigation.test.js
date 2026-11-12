@@ -19,6 +19,8 @@ const NOT_IN_MENU = {
   '/transition/': 'linked from Settings and About',
   // Reached through the account control the Menu renders.
   '/profile/': 'account control',
+  // Namespace detail page, linked from the namespace overview and w3id.
+  '/namespace/exposure/': 'linked from the namespace overview',
 }
 
 function pageRoutes(dir = ROUTES) {

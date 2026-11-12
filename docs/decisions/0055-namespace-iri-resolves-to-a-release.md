@@ -134,6 +134,26 @@ machines, and tells **people** what they reached.
   dereferencing destination, not only an exploration tool. That is a standing UI
   commitment, not merely a routing target.
 
+## Extension: an Exposure namespace arrival page (2026-11-12)
+
+The same HTML defect remained at `https://w3id.org/sstim/exposure`. Its
+browser rule intentionally sent both the bare namespace and term IRIs to the
+Workbench entrance, so a request for the namespace alone explained neither the
+Exposure vocabulary nor why an RDF identifier had opened the application.
+
+The staged HTML rule now targets `/namespace/exposure/`. Without a fragment,
+this page identifies the `sstim-ex:` namespace, distinguishes its Stimulus +
+Exposure catalogue from the exact `/sstim/module/exposure` distribution, and
+links the released RDF representations and reference tools. With a fragment,
+it forwards to the knowledge browser and qualifies a bare local name as
+`sstim-ex:`. This preserves the namespace when another namespace shares the
+same local name. RDF content negotiation and the exact module route do not
+change.
+
+The new page must be deployed and verified before this staged `.htaccess`
+change is submitted to `perma-id/w3id.org`. Editing the repository copy alone
+does not change the live persistent redirect.
+
 ## See also
 
 - [ADR 0016](0016-publication-obo-posture-and-registries.md): publication and registry posture.

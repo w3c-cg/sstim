@@ -144,20 +144,19 @@ test('q=0 makes a type unacceptable without poisoning the others', () => {
   expect(go('', 'application/ld+json, text/html;q=0').doc).toBe('latest/sstim-namespace.jsonld')
 })
 
-test('a namespace catalog sends HTML to the application, so a term fragment resolves', () => {
+test('namespace catalogs send HTML to namespace pages that preserve term fragments', () => {
   // A server never sees the fragment, so /sstim/exposure and
   // /sstim/exposure#StimulusChannelRole arrive identically and one destination
   // has to serve both. The generated index cannot serve the second: measured
   // 2026-08-23, WIDOCO anchors by full IRI while the browser carries the bare
   // local name, so nothing matched and the reader landed at the top of the page.
-  // Both namespace catalogs therefore point at a surface that reads the fragment
-  // client-side: /sstim/exposure at the application directly, and /sstim at the
-  // namespace page, which forwards any fragment to the same knowledge browser
-  // (ADR 0055). What matters to this test is that neither sends a term IRI to a
+  // Both namespace catalogs therefore point at namespace pages that read the
+  // fragment client-side and forward it to the knowledge browser (ADR 0055).
+  // What matters to this test is that neither sends a term IRI to a
   // generated index that cannot anchor it.
   expect(go('', BROWSER).doc).toBe(`${APPLICATION}namespace/`)
-  expect(go('exposure', BROWSER).doc).toBe(APPLICATION)
-  expect(go('exposure', 'text/html').doc).toBe(APPLICATION)
+  expect(go('exposure', BROWSER).doc).toBe(`${APPLICATION}namespace/exposure/`)
+  expect(go('exposure', 'text/html').doc).toBe(`${APPLICATION}namespace/exposure/`)
   // Only HTML changes. Every RDF representation still serves the catalog.
   expect(go('exposure', 'text/turtle').doc).toBe('latest/sstim-exposure-namespace.ttl')
   expect(go('exposure', 'application/ld+json').doc).toBe('latest/sstim-exposure-namespace.jsonld')

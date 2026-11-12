@@ -1258,12 +1258,10 @@ else:
             "^exposure$",
             json_ld="https://w3c-cg.github.io/sstim/ontology/latest/sstim-exposure-namespace.jsonld",
             rdf_xml="https://w3c-cg.github.io/sstim/ontology/latest/sstim-exposure-namespace.rdf",
-            # Both namespace catalogs send HTML somewhere that can honour a term
-            # fragment, which a server never sees and a generated index cannot
-            # anchor. This one goes to the application directly; `^$` goes to the
-            # namespace page, which forwards the fragment to the same place
-            # (ADR 0055).
-            html="https://w3c-cg.github.io/sstim/",
+            # Both namespace catalogs have human-facing namespace pages that
+            # forward term fragments to the knowledge browser (ADR 0055).
+            # The Exposure page qualifies a bare local name as sstim-ex.
+            html="https://w3c-cg.github.io/sstim/namespace/exposure/",
             turtle="https://w3c-cg.github.io/sstim/ontology/latest/sstim-exposure-namespace.ttl",
         ),
         *negotiated_directives(

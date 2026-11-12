@@ -8,6 +8,7 @@ import { snapshotInventory } from './sstim-w3id-snapshot-routes.mjs'
 import { loadRules, resolveRoute } from './w3id-negotiation.mjs'
 import { smokeStagedTargets } from './w3id-staged-smoke.mjs'
 import {
+  BROWSER_ACCEPT,
   EXPECTED_RULE_COUNTS,
   LIVE_ECOSYSTEM_TARGET,
   PRODUCTION_TARGETS,
@@ -86,6 +87,8 @@ test('every production target belongs to an explicit reviewed category', () => {
 test('publication, graph and project targets keep their exact suffix', () => {
   expect(retargetTarget('https://w3c-cg.github.io/sstim/'))
     .toBe('https://labiosyncare.github.io/')
+  expect(retargetTarget('https://w3c-cg.github.io/sstim/namespace/exposure/'))
+    .toBe('https://labiosyncare.github.io/namespace/exposure/')
   expect(retargetTarget('https://w3c-cg.github.io/sstim/ontology/sstim-$1-profile.rdf'))
     .toBe('https://labiosyncare.github.io/ontology/sstim-$1-profile.rdf')
   expect(retargetTarget('https://w3c-cg.github.io/sstim/graph/#sstim-$1:$2'))
@@ -146,6 +149,8 @@ test('the full staged request matrix is resolution-equivalent to production', ()
 
   expect(resolveRoute('specialist/renato-fabbri', 'text/html', stagedRules).location)
     .toBe('https://labiosyncare.github.io/graph/#sstim-specialist:renato-fabbri')
+  expect(resolveRoute('exposure', BROWSER_ACCEPT, stagedRules).location)
+    .toBe('https://labiosyncare.github.io/namespace/exposure/')
   expect(resolveRoute('ecosystem-record/role/curator-2026', 'text/html', stagedRules).location)
     .toBe('https://labiosyncare.github.io/graph/#sstim-ecosystem-record:role/curator-2026')
 })

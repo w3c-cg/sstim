@@ -113,6 +113,12 @@ are chosen but not yet installed — do not describe them as how the app works.
 | PWA / offline | SvelteKit native service worker | built-in | Installable, offline-capable from the same static `dist/`. No `vite-plugin-pwa`. Three binding constraints — see ADR 0009 + `docs/technical/PWA_SERVICE_WORKER.md` |
 | Dev toolchain | Nix flake | flakes | First-class: `flake.nix` pins Node, Python+pySHACL, WABT; CI runs inside it. `flake.lock` is the source of truth — regenerate via `nix flake update` |
 
+**Namespace arrivals (ADR 0055).** HTML at `w3id.org/sstim` lands on
+`/namespace/`; the staged HTML target for `w3id.org/sstim/exposure` is
+`/namespace/exposure/`. These pages explain the bare namespace and forward term
+fragments to the knowledge browser; the Exposure page qualifies bare names as
+`sstim-ex:`. Deploy and verify a new target before submitting its w3id rule.
+
 ### Svelte 5 AI tooling setup
 
 Svelte 5 uses **runes syntax** (`$props()`, `$state()`, `$derived()`, `$effect()`,

@@ -36,7 +36,7 @@
     { prefix: 'sstim', what: 'OWL classes and properties. The ontology proper.' },
     { prefix: 'sstim-v', what: 'SKOS concepts: frequency bands, techniques, modalities.' },
     { prefix: 'sstim-sh', what: 'SHACL shapes that validate conforming data.' },
-    { prefix: 'sstim-ex', what: 'Exposure terms: how a stimulus reaches a person.' },
+    { prefix: 'sstim-ex', what: 'Exposure terms: how a stimulus reaches a person.', route: '/namespace/exposure/' },
     { prefix: 'sstim-eco', what: 'Ecosystem terms: agents, relationships, engagement records.' },
   ]
 
@@ -173,7 +173,13 @@
         {#each termSpaces as row}
           <tr>
             <td><code>{row.prefix}:</code></td>
-            <td><code class="iri">{PREFIXES[row.prefix]}</code></td>
+            <td>
+              {#if row.route}
+                <a href={applicationRoute(row.route)}><code class="iri">{PREFIXES[row.prefix]}</code></a>
+              {:else}
+                <code class="iri">{PREFIXES[row.prefix]}</code>
+              {/if}
+            </td>
             <td>{row.what}</td>
           </tr>
         {/each}

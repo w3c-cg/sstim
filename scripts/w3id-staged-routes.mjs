@@ -113,6 +113,7 @@ export const STAGED_REQUEST_MATRIX = Object.freeze([
   { label: 'Kernel RDF/XML', path: 'kernel', accept: 'application/rdf+xml', status: 303 },
   { label: 'Kernel docs', path: 'kernel', accept: BROWSER_ACCEPT, status: 303 },
   { label: 'Exposure namespace', path: 'exposure', accept: 'text/turtle', status: 303 },
+  { label: 'Exposure namespace HTML', path: 'exposure', accept: BROWSER_ACCEPT, status: 303 },
   { label: 'Exposure module', path: 'module/exposure', accept: 'text/turtle', status: 303 },
   { label: 'Stimulus module', path: 'stimulus', accept: 'application/ld+json', status: 303 },
   { label: 'Vocabulary docs', path: 'vocab', accept: BROWSER_ACCEPT, status: 303 },

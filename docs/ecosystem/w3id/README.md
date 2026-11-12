@@ -110,6 +110,18 @@ before the matching rule is merged.** After a merge, keep this staging copy and
 the live `.htaccess` in sync — any Pages layout change, new module, or new
 version means updating both.
 
+**Exposure HTML change staged 2026-11-12:** `/sstim/exposure` now names
+`https://w3c-cg.github.io/sstim/namespace/exposure/` as its browser target in the
+repository copy. First deploy that page to both publication origins and verify
+that the bare page describes the namespace and
+`/namespace/exposure/#StimulusChannel` opens the `sstim-ex:StimulusChannel`
+term. Then submit only the Exposure HTML target and its explanatory comment
+to `ids/sstim/.htaccess` upstream, leaving the existing RDF targets intact.
+After merge, verify `Accept: text/html` returns the new `303 Location`, a
+browser term IRI preserves its selection, and Turtle, JSON-LD, and RDF/XML still
+reach the released namespace catalogue. Until that merge, the live browser
+redirect continues to reach the project entrance.
+
 ## Open follow-ups
 
 - **Automate post-deploy route verification.** `w3id-negotiation.mjs` models the
