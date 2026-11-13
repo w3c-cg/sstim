@@ -70,6 +70,21 @@ describe('the committed record routes (ADR 0065)', () => {
 })
 
 describe('one record', () => {
+  test('reports a fallback that loses the record identity', () => {
+    const rules = parseRules(htaccess).map(rule => rule.conds.length === 0 &&
+      rule.pattern === '^ref/([A-Z][A-Z0-9_]*)/?$'
+      ? { ...rule, target: 'https://w3c-cg.github.io/sstim/' }
+      : rule)
+    const identifier = 'https://w3id.org/sstim/ref/IACCARINO_2016'
+    const problems = recordProblems(identifier, { rules, documents: new Map() })
+    expect(problems).toContain(
+      `${identifier}: fallback Accept "application/ld+json" gets 303 https://w3c-cg.github.io/sstim/, ` +
+      'not its graph node https://w3c-cg.github.io/sstim/graph/#sstim-ref:IACCARINO_2016',
+    )
+    expect(problems.some(problem => problem.includes('fallback Accept "application/n-triples"'))).toBe(true)
+    expect(problems.some(problem => problem.includes('text/html;q=0'))).toBe(true)
+  })
+
   test('is unpublished when its record document is missing', () => {
     const identifier = 'https://w3id.org/sstim/implementation/bsclab/evidence/population/human-scalp-eeg'
     const problems = recordProblems(identifier, { rules: parseRules(htaccess), documents: new Map() })

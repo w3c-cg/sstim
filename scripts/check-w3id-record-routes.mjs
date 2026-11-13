@@ -8,8 +8,8 @@
 //
 //   - a browser is sent to that record's node in the knowledge browser;
 //   - an RDF client is sent to a document that exists and describes the record,
-//     its own committed file or its generated record document, and a format
-//     the route does not serve is refused with 406;
+//     its own committed file or its generated record document; an unserved or
+//     refused-only Accept header falls back to the record's browser node;
 //   - a name that is no committed record ends at a target nothing publishes,
 //     so a route never lands on a file that seems to describe it, and a path
 //     outside a family's grammar stays a 404 here;
@@ -26,7 +26,7 @@ import { Parser } from 'n3'
 import { RECORD_PATTERNS } from './check-w3id-route-targets.mjs'
 import { buildRecordDocuments, committedInstanceSources } from './gen-record-documents.mjs'
 import { loadRules, resolveRoute } from './w3id-negotiation.mjs'
-import { PRODUCTION_TARGETS, BROWSER_ACCEPT } from './w3id-staged-routes.mjs'
+import { PRODUCTION_TARGETS, BROWSER_ACCEPT, FALLBACK_ACCEPTS } from './w3id-staged-routes.mjs'
 import { PREFIXES, SSTIM_IDENTIFIER_ROOT } from '../src/rdf/namespaces.js'
 import {
   RECORD_FAMILIES,
@@ -40,6 +40,7 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ONTOLOGY = join(ROOT, 'static', 'ontology')
 const RDF_ACCEPTS = ['text/turtle', '', '*/*']
+const RECORD_FALLBACK_ACCEPTS = ['application/ld+json', ...FALLBACK_ACCEPTS]
 
 // Identifiers the committed RDF mentions that deliberately resolve nowhere.
 // Each entry is a decision; an identifier that matches none of them fails.
@@ -140,9 +141,11 @@ export function recordProblems(identifier, { rules, documents, root = ROOT }) {
       problems.push(`${identifier}: Accept "${accept}" gets ${rdf.status} ${rdf.location ?? ''}, not ${document}`)
     }
   }
-  const refused = resolveRoute(path, 'application/ld+json', rules)
-  if (refused.status !== 406) {
-    problems.push(`${identifier}: an unserved format gets ${refused.status}, not 406`)
+  for (const accept of RECORD_FALLBACK_ACCEPTS) {
+    const fallback = resolveRoute(path, accept, rules)
+    if (fallback.status !== 303 || fallback.location !== node) {
+      problems.push(`${identifier}: fallback Accept "${accept}" gets ${fallback.status} ${fallback.location ?? ''}, not its graph node ${node}`)
+    }
   }
 
   const relativePath = recordDocumentPath(identifier)
@@ -225,7 +228,7 @@ export function checkRecordRoutes({ rules = loadRules(), root = ROOT } = {}) {
   for (const { identifier } of records) problems.push(...recordProblems(identifier, { rules, documents, root }))
 
   for (const [family, path] of Object.entries(ABSENT_RECORDS)) {
-    for (const accept of [...RDF_ACCEPTS, BROWSER_ACCEPT]) {
+    for (const accept of [...RDF_ACCEPTS, BROWSER_ACCEPT, ...RECORD_FALLBACK_ACCEPTS]) {
       const { status, location } = resolveRoute(path, accept, rules)
       if (status < 400 && isPublished(location, { root, documents })) {
         problems.push(`${family}: ${path} names no record but reaches the published ${location}`)
@@ -233,7 +236,7 @@ export function checkRecordRoutes({ rules = loadRules(), root = ROOT } = {}) {
     }
   }
   for (const path of CLOSED_PATHS) {
-    for (const accept of [...RDF_ACCEPTS, BROWSER_ACCEPT]) {
+    for (const accept of [...RDF_ACCEPTS, BROWSER_ACCEPT, ...RECORD_FALLBACK_ACCEPTS]) {
       const { status } = resolveRoute(path, accept, rules)
       if (status !== 404) problems.push(`${path} is outside every record grammar but answers ${status}`)
     }

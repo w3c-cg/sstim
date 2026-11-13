@@ -168,9 +168,11 @@ FRAMEWORK_VOCABULARY_HTML_ROUTES = {
     "framework/bsc/shapes": f"{BSC_FRAMEWORK_DIRECTORY}bsc-shapes.ttl",
 }
 
-# Canonical Accept matching for every staged content-negotiated route. Explicit
-# RDF types win in JSON-LD, RDF/XML order, then HTML, then Turtle/wildcard.
-# Full media ranges are matched case-insensitively and q=0 is never acceptable.
+# Canonical Accept expressions shared by staged content-negotiated routes.
+# Each audited block preserves its existing representation precedence.
+# Full media ranges are matched case-insensitively; q=0 skips an explicit
+# representation branch. A route's final browser fallback is best-effort and
+# still answers unsupported or refused-only headers.
 _Q_ZERO_GUARD = (
     r"(?![^,]*;\s*q\s*=\s*0(?:\.0*)?\s*(?:;|,|$))"
 )
@@ -188,9 +190,9 @@ _TURTLE_ACCEPT_RE = (
     r"(?:^|,)\s*(?:text/turtle|application/x-turtle|\*/\*)\s*(?=;|,|$)"
     + _Q_ZERO_GUARD
 )
-# The same media types without */*, which leads every negotiated route so a
-# client listing Turtle among others gets it; */* stays last, after HTML, because
-# every browser sends it.
+# The same media types without */*, which leads the manifest-owned routes so a
+# client listing Turtle among others gets it; */* stays last, after HTML,
+# because every browser sends it.
 _EXPLICIT_TURTLE_ACCEPT_RE = (
     r"(?:^|,)\s*(?:text/turtle|application/x-turtle)\s*(?=;|,|$)"
     + _Q_ZERO_GUARD
@@ -1162,8 +1164,9 @@ w3id_text = W3ID_STAGING_FILE.read_text(encoding="utf-8")
 
 # Persistent module/profile routes must cover the manifest exactly. Validate
 # the complete directive matrix, not just route-slug counts: every supported
-# representation must map to its exact artifact, q=0/unsupported requests must
-# reach 406, and no shadow copy may occur elsewhere in the file.
+# representation must map to its exact artifact, unsupported/refused-only
+# requests must reach the browser fallback, and no shadow copy may occur
+# elsewhere in the file. Wildcard/no-Accept requests keep their Turtle default.
 manifest_route_start = "# BEGIN audited SSTIM manifest routes"
 manifest_route_end = "# END audited SSTIM manifest routes"
 
@@ -1194,6 +1197,7 @@ else:
         html: str,
         turtle: str,
         lead: bool = True,
+        fallback_overrides: tuple[str, ...] = (),
     ) -> tuple[str, ...]:
         return (
             *(turtle_first(pattern, turtle) if lead else ()),
@@ -1206,7 +1210,8 @@ else:
             EMPTY_ACCEPT,
             TURTLE_ACCEPT,
             f"RewriteRule {pattern} {turtle} [R=303,L]",
-            f"RewriteRule {pattern} - [R=406,L]",
+            *fallback_overrides,
+            f"RewriteRule {pattern} {html} [R=303,L]",
         )
 
     module_slugs = [
@@ -1282,6 +1287,7 @@ else:
             html="https://w3c-cg.github.io/sstim/ontology/docs/",
             turtle="https://w3c-cg.github.io/sstim/ontology/latest/sstim-$1.ttl",
             lead=False,
+            fallback_overrides=documentation_overrides[1:],
         ),
         # No route in this block serves the working tree. RDF and JSON come from
         # `latest/`, the newest frozen release, so what dereferencing any
@@ -1333,12 +1339,13 @@ else:
             )
 
 
-# Prove that the canonical Accept expressions are case-insensitive, reject
-# explicit q=0, return 406 for unsupported-only requests, and retain a stable
-# precedence when a client lists more than one supported representation: an
+# Prove that the canonical Accept expressions are case-insensitive, skip
+# explicit q=0, fall back to HTML for unsupported-only requests, and retain a
+# stable precedence when a client lists more than one supported representation: an
 # explicit Turtle request first, then JSON-LD, RDF/XML and HTML, then */* or no
-# Accept, which also get Turtle.
-def negotiated_kind(header: str) -> str | None:
+# Accept, which also get Turtle. The final browser fallback deliberately answers
+# even when every offered representation has q=0.
+def negotiated_kind(header: str) -> str:
     for kind, pattern in (
         ("turtle", _EXPLICIT_TURTLE_ACCEPT_RE),
         ("jsonld", _JSON_LD_ACCEPT_RE),
@@ -1349,7 +1356,7 @@ def negotiated_kind(header: str) -> str | None:
             return kind
     if not header or re.search(_TURTLE_ACCEPT_RE, header, flags=re.IGNORECASE):
         return "turtle"
-    return None
+    return "html"
 
 
 accept_contract = {
@@ -1362,10 +1369,10 @@ accept_contract = {
     "text/html;q=0, application/ld+json": "jsonld",
     "application/rdf+xml;q=0, text/html": "html",
     "application/ld+json;q=0.01": "jsonld",
-    "application/ld+json;q=0": None,
-    "application/ld+json;q=0.000": None,
-    "*/*;q=0": None,
-    "application/json": None,
+    "application/ld+json;q=0": "html",
+    "application/ld+json;q=0.000": "html",
+    "*/*;q=0": "html",
+    "application/json": "html",
     "text/html, application/ld+json": "jsonld",
     "text/turtle, application/ld+json;q=0.5": "turtle",
     "application/ld+json, text/turtle;q=0.1": "turtle",
@@ -1508,10 +1515,10 @@ else:
         EMPTY_ACCEPT,
         TURTLE_ACCEPT,
         "RewriteRule ^void$ https://w3c-cg.github.io/sstim/ontology/void.ttl [R=303,L]",
-        "RewriteRule ^void$ - [R=406,L]",
+        "RewriteRule ^void$ https://w3c-cg.github.io/sstim/ [R=303,L]",
     )
     if directive_lines(void_route_block) != expected_void_directives:
-        fail("w3id staging: VoID HTML/Turtle/406 route matrix has drifted")
+        fail("w3id staging: VoID HTML/Turtle/browser-fallback route matrix has drifted")
 
 
 def check_exact_w3id_route_block(
@@ -1519,7 +1526,7 @@ def check_exact_w3id_route_block(
     expected_routes: dict[str, str],
     expected_html_routes: dict[str, str],
 ) -> None:
-    """Assert exact HTML/Turtle/406 directives for a delimited route block."""
+    """Assert exact HTML/Turtle/browser-fallback directives for a route block."""
     start = f"# BEGIN audited {block_name} routes"
     end = f"# END audited {block_name} routes"
     if w3id_text.count(start) != 1 or w3id_text.count(end) != 1:
@@ -1549,13 +1556,19 @@ def check_exact_w3id_route_block(
                 EMPTY_ACCEPT,
                 TURTLE_ACCEPT,
                 f"RewriteRule {pattern} {target} [R=303,L]",
-                f"RewriteRule {pattern} - [R=406,L]",
             )
+        )
+        # A shared RDF document can describe several identities whose browser
+        # targets differ. Preserve each exact HTML route and its graph fragment
+        # rather than copying the composite RDF pattern into the fallback.
+        expected_directives.extend(
+            f"RewriteRule ^{route}/?$ {expected_html_routes[route]} [R=303,L,NE]"
+            for route in routes
         )
     if directive_lines(block) != tuple(expected_directives):
         fail(
             f"w3id staging: {block_name} block must exactly map every HTML and "
-            "Turtle request and reject unsupported/q=0 requests"
+            "Turtle request and preserve each identity's browser fallback"
         )
 
 
@@ -1611,19 +1624,21 @@ else:
         TURTLE_ACCEPT,
         r"RewriteRule ^(specialist|organization)/(?!synthetic-)[A-Za-z0-9._~-]+/?$ "
         f"{ECOSYSTEM_PUBLIC_DUMP} [R=303,L]",
-        r"RewriteRule ^(specialist|organization)/(?!synthetic-)[A-Za-z0-9._~-]+/?$ "
-        "- [R=406,L]",
+        r"RewriteRule ^(specialist|organization)/((?!synthetic-)"
+        r"[A-Za-z0-9._~-]+)/?$ https://w3c-cg.github.io/sstim/graph/"
+        r"#sstim-$1:$2 [R=303,L,NE]",
         EMPTY_ACCEPT,
         TURTLE_ACCEPT,
         r"RewriteRule ^ecosystem-record/(relationship|activity|role)/"
         rf"(?!synthetic-)[A-Za-z0-9._~-]+/?$ {ECOSYSTEM_PUBLIC_DUMP} [R=303,L]",
         r"RewriteRule ^ecosystem-record/(relationship|activity|role)/"
-        r"(?!synthetic-)[A-Za-z0-9._~-]+/?$ - [R=406,L]",
+        r"((?!synthetic-)[A-Za-z0-9._~-]+)/?$ https://w3c-cg.github.io/sstim/"
+        r"graph/#sstim-ecosystem-record:$1/$2 [R=303,L,NE]",
     )
     if live_directives != expected_live_directives:
         fail(
             "w3id staging: live ecosystem block must contain only the canonical "
-            "namespace-level HTML, Turtle, and 406 routes"
+            "namespace-level HTML, Turtle, and browser-fallback routes"
         )
 
 for agent in ecosystem_agents:

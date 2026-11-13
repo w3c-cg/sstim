@@ -79,18 +79,86 @@ export const PINNED_ROOT_ONTOLOGY = 'https://labiosyncare.github.io/ontology/'
 // their own files, evidence records and references to generated record
 // documents. Total 99 -> 102: ontology 55 -> 56, graph 17 -> 18, statusOnly
 // 18 -> 19.
+//
+// 2026-11-13, the registry review replaces nineteen 406 fallthroughs with the
+// existing browser destination for each path. Splitting shared path groups
+// requires twenty-seven redirects: total 102 -> 110, ontology 56 -> 61,
+// graph 18 -> 36, application 6 -> 10 and statusOnly 19 -> 0.
 export const EXPECTED_RULE_COUNTS = Object.freeze({
-  total: 102,
-  ontology: 56,
+  total: 110,
+  ontology: 61,
   pinnedOntology: 1,
-  graph: 18,
-  application: 6,
+  graph: 36,
+  application: 10,
   external: 2,
-  statusOnly: 19,
+  statusOnly: 0,
 })
 
 export const BROWSER_ACCEPT =
   'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+
+// Independent expected destinations for the nineteen negotiated families whose
+// final default used to be 406. Exercise every member of a split browser group,
+// not only its first path: their graph fragments and namespace pages differ.
+const app = PRODUCTION_APPLICATION_BASE
+const graph = `${app}graph/`
+const docs = `${app}ontology/docs/`
+const fallbackFamilies = [
+  ['profile', ['kernel', 'core', 'core-plus', 'full'].map(id => [`profile/${id}`, docs])],
+  ['kernel', [['kernel', docs]]],
+  ['exposure namespace', [['exposure', `${app}namespace/exposure/`]]],
+  ['exposure module', [['module/exposure', docs]]],
+  ['module', [
+    'stimulus', 'core-shapes', 'common', 'technique', 'configuration', 'session',
+    'evidence', 'neuromodulation', 'patch-studio', 'vocab', 'ecosystem',
+    'neuromodulation-evidence', 'evidence-exposure', 'technique-exposure', 'alignments', 'shapes',
+  ].map(id => [id, ['vocab', 'ecosystem'].includes(id) ? app : docs])],
+  ['namespace', [['', `${app}namespace/`]]],
+  ['programme', [['ecosystem/biosyncare', `${graph}#sstim-ecosystem:biosyncare`]]],
+  ['framework', [['framework/bsc', `${graph}#bsc-fw:`]]],
+  ['implementation', [
+    ['implementation/bsclab', `${graph}#bsclab:`],
+    ['implementation/biosyncare', `${graph}#biosyncare:`],
+    ['implementation/bsclab/component/patch-studio', `${graph}#bsclab:component/patch-studio`],
+  ]],
+  ['record', [
+    ['preset', 'heal-theta-breathing-seed'],
+    ['protocol', 'chan-2022-40hz-audiovisual-daily-home-use'],
+    ['experiment', 'color-field-blink'],
+  ].map(([kind, id]) => [`implementation/bsclab/${kind}/${id}`, `${graph}#bsclab-${kind}:${id}`])],
+  ['evidence record', [[
+    'implementation/bsclab/evidence/alpha-attention-memory/revision/1',
+    `${graph}#bsclab-evidence:alpha-attention-memory/revision/1`,
+  ]]],
+  ['reference', [['ref/IACCARINO_2016', `${graph}#sstim-ref:IACCARINO_2016`]]],
+  ['originated technique', [
+    'martigli-breathing-oscillation', 'martigli-binaural-hybrid', 'symmetry-permutation-entrainment',
+  ].map(id => [`framework/bsc/technique/${id}`, `${graph}#bsc-fw-tech:${id}`])],
+  ['retired technique', [
+    ['binaural-beat-stimulation', 'techBinauralBeats'],
+    ['photic-rhythm-stimulation', 'techPhoticDriving'],
+    ['audiovisual-rhythm-coordination', 'techAudiovisualEntrainment'],
+    ['vibrotactile-rhythm-stimulation', 'techVibrotactileEntrainment'],
+  ].map(([id, term]) => [`framework/bsc/technique/${id}`, `${graph}#${term}`])],
+  ['framework vocabulary', [['framework/bsc/vocab', `${graph}?ns=bsc-v`]]],
+  ['framework shapes', [['framework/bsc/shapes', `${app}ontology/frameworks/bsc/bsc-shapes.ttl`]]],
+  ['live agent', [
+    ['specialist', 'renato-fabbri'], ['organization', 'ifsc-usp'],
+  ].map(([kind, id]) => [`${kind}/${id}`, `${graph}#sstim-${kind}:${id}`])],
+  ['live relationship', ['relationship', 'activity', 'role']
+    .map(kind => [`ecosystem-record/${kind}/curator-2026`, `${graph}#sstim-ecosystem-record:${kind}/curator-2026`])],
+  ['void', [['void', app]]],
+]
+export const BROWSER_FALLBACK_ROUTES = Object.freeze(fallbackFamilies.flatMap(([family, paths]) =>
+  paths.map(([path, target]) => Object.freeze({ family, path, target }))))
+
+export const FALLBACK_ACCEPTS = Object.freeze([
+  'application/n-triples',
+  'application/ld+json;q=0',
+  // HTML q=0 cannot select the explicit HTML branch. The final redirect is a
+  // deliberately unconditional default after every supported branch failed.
+  'text/turtle;q=0, application/ld+json;q=0, application/rdf+xml;q=0, text/html;q=0, application/xhtml+xml;q=0, */*;q=0',
+])
 
 /** Requests spanning every route family and the significant Accept edges. */
 export const STAGED_REQUEST_MATRIX = Object.freeze([
@@ -100,8 +168,8 @@ export const STAGED_REQUEST_MATRIX = Object.freeze([
   { label: 'namespace JSON-LD', path: '', accept: 'application/ld+json', status: 303 },
   { label: 'namespace RDF/XML', path: '', accept: 'application/rdf+xml', status: 303 },
   { label: 'namespace HTML', path: '', accept: BROWSER_ACCEPT, status: 303 },
-  { label: 'namespace refused JSON-LD', path: '', accept: 'application/ld+json;q=0', status: 406 },
-  { label: 'namespace unsupported', path: '', accept: 'application/n-triples', status: 406 },
+  { label: 'namespace refused JSON-LD', path: '', accept: 'application/ld+json;q=0', status: 303 },
+  { label: 'namespace unsupported', path: '', accept: 'application/n-triples', status: 303 },
   {
     label: 'q=0 does not poison JSON-LD',
     path: '',
@@ -126,7 +194,7 @@ export const STAGED_REQUEST_MATRIX = Object.freeze([
   { label: 'Manifest schema', path: 'manifest-schema/1', accept: '*/*', status: 303 },
   { label: 'VoID Turtle', path: 'void', accept: 'text/turtle', status: 303 },
   { label: 'VoID HTML', path: 'void', accept: BROWSER_ACCEPT, status: 303 },
-  { label: 'VoID unsupported', path: 'void', accept: 'application/ld+json', status: 406 },
+  { label: 'VoID unsupported', path: 'void', accept: 'application/ld+json', status: 303 },
   {
     label: 'programme Graph deep link',
     path: 'ecosystem/biosyncare',
@@ -163,7 +231,7 @@ export const STAGED_REQUEST_MATRIX = Object.freeze([
     label: 'preset unsupported',
     path: 'implementation/bsclab/preset/heal-theta-breathing-seed',
     accept: 'application/ld+json',
-    status: 406,
+    status: 303,
   },
   { label: 'reference Graph deep link', path: 'ref/INGENDOH_2023', accept: BROWSER_ACCEPT, status: 303 },
   { label: 'reference Turtle', path: 'ref/INGENDOH_2023', accept: '', status: 303 },
@@ -281,6 +349,12 @@ export const STAGED_REQUEST_MATRIX = Object.freeze([
   { label: 'v-prefixed version stays closed', path: 'v0.15.0/sstim-core.ttl', accept: '*/*', status: 404 },
   { label: 'nested snapshot path stays closed', path: '0.15.0/subdir/sstim-core.ttl', accept: '*/*', status: 404 },
   { label: 'case-mismatched snapshot stays closed', path: '0.15.0/SSTIM-Core.ttl', accept: '*/*', status: 404 },
+  ...BROWSER_FALLBACK_ROUTES.flatMap(({ family, path }) => FALLBACK_ACCEPTS.map(accept => ({
+    label: `${family} fallback: ${path || '/'} ${accept}`,
+    path,
+    accept,
+    status: 303,
+  }))),
 ])
 
 function fail(message) {

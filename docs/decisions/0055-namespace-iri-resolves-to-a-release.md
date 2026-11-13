@@ -154,6 +154,26 @@ The new page must be deployed and verified before this staged `.htaccess`
 change is submitted to `perma-id/w3id.org`. Editing the repository copy alone
 does not change the live persistent redirect.
 
+## Extension: useful negotiation defaults (2026-11-13)
+
+Review of perma-id/w3id.org#7165 called attention to the checker's
+`htaccess/no-406-fallback` findings. The 19 unversioned negotiated route
+families previously rejected unsupported or refused-only Accept offers with
+406. They now fall back to the destination used by that path's browser route:
+its namespace page, reference documentation, graph entry, or the BSC shapes
+file where that is already the browser destination.
+
+The supported-format branches retain their order and positive `q=0` exclusion.
+Wildcard and absent Accept still select Turtle. The final informational default
+applies only after no supported branch matched, including when the header
+explicitly refuses HTML and offers no supported alternative. This deliberately
+relaxes strict media-type refusal; it does not add a representation.
+
+Composite fallbacks keep each identifier's graph target and namespace, including
+the original capture groups and `NE` flag. Paths outside the recognized family
+grammars and reserved synthetic slugs remain 404. Version IRIs retain their
+existing unconditional Turtle default, and frozen artifacts remain unchanged.
+
 ## See also
 
 - [ADR 0016](0016-publication-obo-posture-and-registries.md): publication and registry posture.

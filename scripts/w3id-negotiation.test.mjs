@@ -8,6 +8,7 @@ import { RECORD_PATTERNS } from './check-w3id-route-targets.mjs'
 import { checkRecordRoutes, recordInventory } from './check-w3id-record-routes.mjs'
 import { buildRecordDocuments } from './gen-record-documents.mjs'
 import { loadRules, resolveRoute } from './w3id-negotiation.mjs'
+import { BROWSER_FALLBACK_ROUTES, FALLBACK_ACCEPTS } from './w3id-staged-routes.mjs'
 import { recordFamilyOf } from '../src/rdf/recordFamilies.js'
 import { releaseDirectories } from './publish-latest-ontology.mjs'
 // The deep-link targets are graph-browser hashes, so the prefixes they use have
@@ -136,12 +137,61 @@ test('a client that lists Turtle among other types gets Turtle', () => {
 })
 
 test('q=0 makes a type unacceptable without poisoning the others', () => {
-  // Only type offered is refused by the client, so nothing is acceptable.
-  expect(go('', 'application/ld+json;q=0').status).toBe(406)
-  expect(go('', 'application/n-triples').status).toBe(406)
+  // With no supported range left, the route's final default is its browser
+  // destination. This does not make a refused format eligible for an earlier
+  // explicit negotiation branch.
+  expect(go('', 'application/ld+json;q=0').doc).toBe(`${APPLICATION}namespace/`)
+  expect(go('', 'application/n-triples').doc).toBe(`${APPLICATION}namespace/`)
 
   // q=0 on a different type must not suppress the one actually requested.
   expect(go('', 'application/ld+json, text/html;q=0').doc).toBe('latest/sstim-namespace.jsonld')
+})
+
+test('all nineteen negotiated families fall back to their own browser destination', () => {
+  expect(new Set(BROWSER_FALLBACK_ROUTES.map(({ family }) => family)).size).toBe(19)
+  for (const { family, path, target } of BROWSER_FALLBACK_ROUTES) {
+    const expected = { status: 303, location: target }
+    expect(resolveRoute(path, BROWSER, rules), `${family}: ${path} browser`).toEqual(expected)
+    for (const accept of FALLBACK_ACCEPTS) {
+      expect(resolveRoute(path, accept, rules), `${family}: ${path} ${accept}`).toEqual(expected)
+    }
+    // A refused HTML range must not hide an explicitly acceptable Turtle.
+    expect(go(path, 'text/html;q=0, text/turtle'), path).toEqual(go(path, 'text/turtle'))
+    expect(resolveRoute(path, 'text/turtle;q=0, text/html', rules), path).toEqual(expected)
+    // Preserve the established RDF default for clients that do not ask for a
+    // specific representation, independently of the new final default.
+    expect(go(path, ''), path).toEqual(go(path, 'text/turtle'))
+    expect(go(path, '*/*'), path).toEqual(go(path, 'text/turtle'))
+  }
+})
+
+test('supported alternatives still win after another format is refused', () => {
+  const paths = ['', 'kernel', 'exposure', 'module/exposure',
+    ...BROWSER_FALLBACK_ROUTES.filter(({ family }) => ['profile', 'module'].includes(family))
+      .map(({ path }) => path)]
+  for (const path of paths) {
+    expect(go(path, 'text/turtle;q=0, application/ld+json'), path)
+      .toEqual(go(path, 'application/ld+json'))
+    expect(go(path, 'text/turtle;q=0, application/ld+json;q=0, application/rdf+xml'), path)
+      .toEqual(go(path, 'application/rdf+xml'))
+  }
+})
+
+test('unsupported headers cannot open closed or synthetic identifier paths', () => {
+  for (const path of [
+    'nonexistent', 'profile/core/', 'exposure/',
+    'framework/bsc/technique/not-a-technique',
+    'implementation/bsclab/preset/heal-theta-breathing-seed/voice',
+    'implementation/bsclab/session/synthetic-reference-001',
+    'ref/ingendoh_2023', 'specialist/synthetic-someone', 'organization/synthetic-org',
+    'ecosystem-record/role/synthetic-role', 'ecosystem-record/activity/synthetic-activity',
+    'ecosystem-record/relationship/synthetic-relationship',
+    '0.15/sstim-core.ttl', '0.15.0/subdir/sstim-core.ttl',
+  ]) {
+    for (const accept of [BROWSER, 'text/turtle', ...FALLBACK_ACCEPTS]) {
+      expect(go(path, accept).status, `${path} ${accept}`).toBe(404)
+    }
+  }
 })
 
 test('namespace catalogs send HTML to namespace pages that preserve term fragments', () => {
@@ -351,9 +401,10 @@ test('the BSC framework vocabulary routes outside SSTIM, and a browser keeps its
   }
   // Shapes are not drawable nodes, so a browser gets the Turtle as well.
   expect(go('framework/bsc/shapes', BROWSER).doc).toBe('frameworks/bsc/bsc-shapes.ttl')
-  // No release carries either file, so there is no JSON-LD or RDF/XML export.
-  expect(go('framework/bsc/vocab', 'application/ld+json').status).toBe(406)
-  expect(go('framework/bsc/shapes', 'application/rdf+xml').status).toBe(406)
+  // No release carries either file, so an unserved representation takes the
+  // same final destination as a browser rather than an RDF export.
+  expect(go('framework/bsc/vocab', 'application/ld+json').doc).toBe(APPLICATION + 'graph/?ns=bsc-v')
+  expect(go('framework/bsc/shapes', 'application/rdf+xml').doc).toBe('frameworks/bsc/bsc-shapes.ttl')
   // The framework record keeps its own route; the vocabulary is not a part of it.
   expect(go('framework/bsc', 'text/turtle').doc).toBe('instances/frameworks/bsc.ttl')
 })
@@ -408,7 +459,8 @@ test('every committed record resolves by its family pattern (ADR 0065)', () => {
     expect(go(path, 'text/turtle').doc, `${iri} does not return its owning Turtle`)
       .toBe(logicalApplicationPath(sourceUrl).replace(/^\/ontology\//, ''))
     expect(go(path, '').doc).toBe(logicalApplicationPath(sourceUrl).replace(/^\/ontology\//, ''))
-    expect(go(path, 'application/ld+json').status).toBe(406)
+    expect(go(path, 'application/ld+json').doc)
+      .toBe(`https://w3c-cg.github.io/sstim/graph/#${toCurie(iri)}`)
   }
   for (const { iri } of references) {
     const path = sstimPath(iri)
@@ -438,7 +490,8 @@ test('every committed record resolves by its family pattern (ADR 0065)', () => {
 
   const entityHashRules = rules.filter(({ pattern, target }) =>
     RECORD_PATTERNS.has(pattern.replace(/^\^/, '').replace(/\$$/, '')) && target.includes('/graph/#'))
-  expect(entityHashRules).toHaveLength(3)
+  // One explicit HTML rule and one unconditional fallback per record family.
+  expect(entityHashRules).toHaveLength(6)
   for (const rule of entityHashRules) {
     expect(rule.flags, `${rule.pattern} must preserve its literal # fragment`).toContain('NE')
   }

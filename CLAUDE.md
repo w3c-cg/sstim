@@ -118,6 +118,10 @@ are chosen but not yet installed — do not describe them as how the app works.
 `/namespace/exposure/`. These pages explain the bare namespace and forward term
 fragments to the knowledge browser; the Exposure page qualifies bare names as
 `sstim-ex:`. Deploy and verify a new target before submitting its w3id rule.
+The staged unversioned routes keep their supported-format branches and Turtle
+defaults for absent/wildcard Accept; an unsupported or refused-only offer then
+falls back to the same browser destination. Keep those defaults within each
+existing identifier grammar, including graph fragments and namespace context.
 
 **Generated reference HTML (ADR 0023).** `scripts/fix-widoco-links.mjs` repairs
 orphaned links and makes fallback OBO identifier labels searchable (for example,

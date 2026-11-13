@@ -9,7 +9,9 @@ import { loadRules, resolveRoute } from './w3id-negotiation.mjs'
 import { smokeStagedTargets } from './w3id-staged-smoke.mjs'
 import {
   BROWSER_ACCEPT,
+  BROWSER_FALLBACK_ROUTES,
   EXPECTED_RULE_COUNTS,
+  FALLBACK_ACCEPTS,
   LIVE_ECOSYSTEM_TARGET,
   PRODUCTION_TARGETS,
   STAGED_APPLICATION_BASE,
@@ -67,14 +69,16 @@ test('every production target belongs to an explicit reviewed category', () => {
   // rule leads each of the six manifest-owned groups and both version patterns.
   // +3 on 2026-10-14: the exact preset and reference block became three record
   // families by pattern (ADR 0065), one more graph, Turtle and 406 rule each.
+  // On 2026-11-13 the nineteen 406 rules became twenty-seven browser-default
+  // redirects, preserving the different destinations in combined path groups.
   expect(ruleCounts(productionRules)).toEqual({
-    total: 102,
-    ontology: 56,
-    graph: 18,
-    application: 6,
+    total: 110,
+    ontology: 61,
+    graph: 36,
+    application: 10,
     external: 2,
     pinnedOntology: 1,
-    statusOnly: 19,
+    statusOnly: 0,
   })
   expect(productionRules.filter(({ target }) => classifyTarget(target) === 'external'))
     .toHaveLength(2)
@@ -153,6 +157,18 @@ test('the full staged request matrix is resolution-equivalent to production', ()
     .toBe('https://labiosyncare.github.io/namespace/exposure/')
   expect(resolveRoute('ecosystem-record/role/curator-2026', 'text/html', stagedRules).location)
     .toBe('https://labiosyncare.github.io/graph/#sstim-ecosystem-record:role/curator-2026')
+})
+
+test('all browser fallbacks preserve their path and fragment at the candidate mount', () => {
+  const stagedRules = retargetRules(productionRules, 'http://127.0.0.1:4173/sstim/')
+  for (const { path, target } of BROWSER_FALLBACK_ROUTES) {
+    for (const accept of FALLBACK_ACCEPTS) {
+      expect(resolveRoute(path, accept, stagedRules), `${path} ${accept}`).toEqual({
+        status: 303,
+        location: retargetTarget(target, 'http://127.0.0.1:4173/sstim/'),
+      })
+    }
+  }
 })
 
 test('every frozen release path is retargeted without changing snapshot semantics', () => {

@@ -98,8 +98,11 @@ The namespace, Kernel, module, and profile routes negotiate in this explicit
 precedence: Turtle when the client names it (`text/turtle` or
 `application/x-turtle`), then JSON-LD (`application/ld+json`), RDF/XML
 (`application/rdf+xml`), HTML, and finally Turtle again for `*/*` or no
-`Accept`. Matching is case-insensitive, `q=0` ranges are not acceptable, and
-requests with no acceptable supported range receive `406 Not Acceptable`. The
+`Accept`. Matching is case-insensitive, and `q=0` ranges are excluded from the
+supported-format branches. If no branch matches, the final default reaches
+the same destination as that path's browser request, including when the header
+refuses HTML and offers no supported alternative. This useful informational
+fallback replaces the former `406 Not Acceptable` responses. The
 precedence is deterministic server ordering, not full ranking by positive `q`
 magnitude, which mod_rewrite cannot do. Turtle leads because it is SSTIM's source
 format: until 2026-10-07 JSON-LD came first, so a client that preferred Turtle

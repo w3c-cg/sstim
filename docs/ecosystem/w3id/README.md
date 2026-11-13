@@ -86,8 +86,9 @@ by an earlier one, a module inheriting the wrong documentation page.
 4. Run `make w3id-routes` here.
 5. In the w3id clone, run their checker:
    `(cd tools/check && npm ci) && node tools/check/bin/w3id-check.js`. Expect
-   no errors. The per-route `406` rules draw `htaccess/no-406-fallback`
-   warnings, which are deliberate.
+   no errors or warnings. Negotiation fallthroughs use the existing browser
+   destination for that path, after preserving supported-format branches and
+   Turtle defaults for wildcard or absent Accept.
 6. Exercise the rules on a real Apache, and compare against production. On
    macOS the system Apache works:
    `W3ID_ALLOW_SYSTEM_HTTPD=1 W3ID_MODDIR=/usr/libexec/apache2 W3ID_MIMETYPES=/private/etc/apache2/mime.types W3ID_PORT=8089 tools/server/bin/run-server start`,
@@ -124,12 +125,17 @@ redirect continues to reach the project entrance.
 
 Both landing-page publications were verified on 2026-11-12 at commit
 `6a535bfd05c4326218866330a7efa30a274037ac`, including live term-fragment
-selection on production. The minimal registry patch was submitted with `gh` as
+selection on production. The registry update was submitted with `gh` as
 [perma-id/w3id.org#7165](https://github.com/perma-id/w3id.org/pull/7165).
-The PR is open and its Rules check passed. It changes only the Exposure HTML
-target and its comment; the live redirect changes after upstream merge and
-deployment. The [submitted PR description](EXPOSURE_NAMESPACE_PR.md) records the
-scope and the Apache, registry-checker and browser verification results.
+The PR adds the Exposure HTML target and, following review on 2026-11-13,
+replaces the 19 negotiated 406 fallthroughs with each path's existing browser
+destination. Its revised rules pass the upstream checker without errors or
+warnings and a 1,260-request Apache matrix. Supported format destinations,
+wildcard/no-Accept Turtle defaults and closed-path 404s are preserved; an
+unsupported or refused-only offer now receives an informational redirect.
+The live rules change after upstream merge and deployment. The
+[submitted PR description](EXPOSURE_NAMESPACE_PR.md) records the scope and
+verification results.
 
 `/sstim/alignments` is unchanged by this PR. It identifies a mapping-axiom
 module, not a separate hash namespace. Its HTML branch reaches the Full
@@ -144,7 +150,7 @@ would make the mapping scope, downloads and provenance easier to find.
 - **Automate post-deploy route verification.** `w3id-negotiation.mjs` models the
   rules locally; nothing yet asserts the *deployed* behaviour over HTTP. A gate
   should check each redirect status and exact `Location`, the final status and
-  media type, RDF parsing and checksum, and representative `406` cases. Until
+  media type, RDF parsing and checksum, and unsupported-Accept fallbacks. Until
   then the verification commands in [`sstim/README.md`](sstim/README.md) are a
   manual rollout checklist. (`Vary: Accept` is out of scope — see that file for
   why it is unobtainable rather than outstanding.)
